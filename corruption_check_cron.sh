@@ -1,11 +1,11 @@
 
-date=`date`
+run_date=`date`
 num_files = 1000
-you = "me@test.com"
+mail_to_address = "me@test.com"
 
 python corruption_check $num_files 2>/tmp/LDR_CORRUPTION_ERRORS
 
-echo "On $date a fixity check was performed on $num_files in the repository and the following were found corrupted. If there are no files listed that means no files were found to be corrupt." >> /tmp/LDR_CORRUPTION_MESSAGE
+echo "On $run_date a fixity check was performed on $num_files in the repository and the following were found corrupted. If there are no files listed that means no files were found to be corrupt." >> /tmp/LDR_CORRUPTION_MESSAGE
 
 cat /tmp/LDR_CORRUPTION_ERRORS >> /tmp/LDR_CORRUPTION_MESSAGE
 
