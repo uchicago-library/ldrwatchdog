@@ -1,0 +1,24 @@
+Metadata-Version: 1.1
+Name: ldrwatchdog
+Version: 0.0.1.dev0
+Summary: A suite of tools for performing watchdog functionality on digital repositories
+Home-page: UNKNOWN
+Author: Brian Balsamo, Tyler Danstrom
+Author-email: balsamo@uchicago.edu, tdanstrom@uchicago.edu
+License: UNKNOWN
+Description: # About the Watchdog
+        
+        This is a set of tools that are intended to run as cronjobs on a server hosting a digital repository conforming to the stickshift repository system. 
+        
+        It uses the livePremis environment to do the following
+        
+        1. perform regular fixity checks
+        2. add new premis records to the livePremis environment when new material is added to longTermStorage
+        
+Keywords: uchicago,repository,file-level,watchdog
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: Unix
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

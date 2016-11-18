@@ -12,6 +12,7 @@ __DESCRIPTION__ = "a command line tool to run a fixity check run on the contents
 if __name__ == "__main__":
     arguments = ArgumentParser(description="a command-line tool to check fixity of files in longTermStorage",
                                epilog="Copyright University of Chicago, 2016; authored by Tyler Danstrom <tdanstrom@uchicago.edu>")
+    arguments.add_argument("livePremis", action='store', help="location on-disk of livePremis directory")
     arguments.add_argument("max_num_files", action='store', type=int, help="maximum allowed number of files for this run")
     arguments.add_argument("-b", "--max_bytes_to_read", action='store', type=int, help="total number of bytes to read for this run")
     parsed_args = arguments.parse_args()
