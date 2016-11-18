@@ -71,4 +71,4 @@ if __name__ == "__main__":
     arguments.add_argument("livepremis_root", action="store", help="the locaiton of livePremis")
     parsed_args = arguments.parse_args()
     cached_file = join(parsed_args.livepremis_root, "cached.json")
-    main(cached_file, parsed_args.longterm_root, parsed_args.livepremis_root)
+    _exit(main(cached_file, parsed_args.longterm_root, parsed_args.livepremis_root))t
