@@ -1,5 +1,0 @@
-setup.py
-ldrwatchdog.egg-info/PKG-INFO
-ldrwatchdog.egg-info/SOURCES.txt
-ldrwatchdog.egg-info/dependency_links.txt
-ldrwatchdog.egg-info/top_level.txt

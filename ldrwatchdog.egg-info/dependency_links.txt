@@ -1,2 +1,0 @@
-https://github.com/uchicago-library/uchicagoldr-toolsuite/tarball/master#egg=uchicagoldrtoolsuite
-https://github.com/uchicago-library/uchicagoldr-premiswork/tarball/master#egg=pypremis
