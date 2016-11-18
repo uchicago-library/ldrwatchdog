@@ -1,8 +1,7 @@
 
-from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime, timedelta
-from os import _exit, scandir
+from os import scandir
 from sys import stderr
 from time import mktime, strptime
 from uuid import uuid4

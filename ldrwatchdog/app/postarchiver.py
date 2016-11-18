@@ -1,5 +1,4 @@
-from argparse import ArgumentParser
-from os import _exit, makedirs, scandir
+from os import makedirs, scandir
 from os.path import dirname, exists, isdir, join, relpath
 import json 
 
@@ -9,7 +8,7 @@ from uchicagoldrtoolsuite.bit_level.lib.ldritems.ldritemcopier import LDRItemCop
 __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"
 __VERSION__ = "1.0.0"
-__DESCRIPTION__ = "a command line tool to find all premis records in longTermStorage and if not already in livePremis copy the file into livePremis"
+__DESCRIPTION__ = "a module to use in a command line tool to find all premis records in longTermStorage and if not already in livePremis copy the file into livePremis"
 
 def retrieve_accession_from_path(a_path, lts_root):
     """a function to extract the accession id from the path to a file from longTermStorage
@@ -64,11 +63,4 @@ def main(cached_file, longterm, live_premis):
     except KeyboardInterrupt:
         return 131
 
-if __name__ == "__main__":
-    arguments = ArgumentParser(description="A tool to check for new premis records in longTermStorage",
-                               epilog="Copyright University of Chicago, 2016; authored by Tyler Danstrom <tdanstrom@uchicago.edu>")
-    arguments.add_argument("longterm_root", action="store", help="the location of longTermStorage")
-    arguments.add_argument("livepremis_root", action="store", help="the locaiton of livePremis")
-    parsed_args = arguments.parse_args()
-    cached_file = join(parsed_args.livepremis_root, "cached.json")
-    _exit(main(cached_file, parsed_args.longterm_root, parsed_args.livepremis_root))t
+
