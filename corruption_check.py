@@ -16,4 +16,4 @@ if __name__ == "__main__":
     arguments.add_argument("max_num_files", action='store', type=int, help="maximum allowed number of files for this run")
     arguments.add_argument("-b", "--max_bytes_to_read", action='store', type=int, help="total number of bytes to read for this run")
     parsed_args = arguments.parse_args()
-    _exit(main(parsed_args.max_num_files, parsed_args.max_bytes_to_read))
+    _exit(main(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read))
