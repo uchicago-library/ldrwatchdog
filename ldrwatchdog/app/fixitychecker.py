@@ -75,7 +75,7 @@ def main(livepremis_loc, total_allowed_files, total_allowed_bytes):
             event_id = EventIdentifier("DOI", str(uuid4()))
             linkedObject = LinkingObjectIdentifier("DOI", n.objid)
             linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
-            if new_hash == n.fixity_value:
+            if compare_two_hashes(new_hash, n.fixity_value):
                 event_result = "success"
                 event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
             else:
