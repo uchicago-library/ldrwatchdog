@@ -1,8 +1,9 @@
+#!/bin/bash
 
 run_date=`date`
 mail_to_address = "me@test.com"
 
-python live_premis_addition.py /home/test/longTermStorage /home/test/livePremis 1> /tmp/LDR_NEW_LIVE_PREMIS_ADDONS
+postarchive /home/test/longTermStorage /home/test/livePremis 1> /tmp/LDR_NEW_LIVE_PREMIS_ADDONS
 
 num_new_premis = `cat /tmp/LDR_LIVE_PREMIS_ADDITIONS | wc -l`
 

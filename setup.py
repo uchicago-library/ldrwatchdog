@@ -31,5 +31,9 @@ setup(
         '/tarball/master#egg=uchicagoldrtoolsuite',
         'https://github.com/uchicago-library/uchicagoldr-premiswork' +
         '/tarball/master#egg=pypremis',
-    ]
+    ],
+    entry_points =  {'console_scripts': ['postarchive = ldrwatchdog.app.postarchiver:main',
+                                         'fixitycheck = ldrwatchdog.app.fixitychecker:main']},
+    scripts=["bin/postarchive_cron",
+             "bin/fixitycheck_cron"]
 )

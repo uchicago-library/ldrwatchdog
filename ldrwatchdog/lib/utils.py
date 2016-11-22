@@ -1,5 +1,5 @@
-
 from collections import namedtuple
+from os.path import relpath
 from sys import stderr
 
 from pypremis.lib import PremisRecord

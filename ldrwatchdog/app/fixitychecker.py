@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime, timedelta
 from os import scandir
@@ -58,30 +59,29 @@ def gather_files(path, live_premis_root=None):
             else:
                 stderr.write("could not open {}\n".format(entry.path))
 
-def main(livepremis_loc, total_allowed_files, total_allowed_bytes):
+def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes):
     """the main function of the command-line module
 
     __Args__
     total_allowed_files (int): an integer representing the total number of files that can be evaluated in this run
     total_allowed_bytes (int): an integer representing the total number of bytes that can be read in this run
     """
-    try:
-        files_to_check = gather_files(livepremis_loc,live_premis_root=livepremis_loc)
-        bytes_read = 0
-        files_used = 0
-        checked = []
-        for n in files_to_check:
-            new_hash = sane_hash('md5', n.content_loc)
-            event_id = EventIdentifier("DOI", str(uuid4()))
-            linkedObject = LinkingObjectIdentifier("DOI", n.objid)
-            linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
-            if compare_two_hashes(new_hash, n.fixity_value):
-                event_result = "success"
-                event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
-            else:
-                event_result = "failure"
-                event_message = "ldrwatchdog.fixitychecker performed fixity check and it failed"
-                stderr.write("{}/{} content file failed fixity check".format(n.arkid, n.objid))
+    files_to_check = gather_files(livepremis_loc,live_premis_root=livepremis_loc)
+    bytes_read = 0
+    files_used = 0
+    checked = []
+    for n in files_to_check:
+        new_hash = sane_hash('md5', n.content_loc)
+        event_id = EventIdentifier("DOI", str(uuid4()))
+        linkedObject = LinkingObjectIdentifier("DOI", n.objid)
+        linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
+        if compare_two_hashes(new_hash, n.fixity_value):
+            event_result = "success"
+            event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
+        else:
+            event_result = "failure"
+            event_message = "ldrwatchdog.fixitychecker performed fixity check and it failed"
+            stderr.write("{}/{} content file failed fixity check".format(n.arkid, n.objid))
             event_detail = EventOutcomeDetail(eventOutcomeDetailNote=event_message)
             event_outcome = EventOutcomeInformation(event_result, event_detail)
             new_event = Event(event_id, "fixity check", datetime.now().isoformat())
@@ -98,6 +98,16 @@ def main(livepremis_loc, total_allowed_files, total_allowed_bytes):
                 break
             elif files_used >=  total_allowed_files:
                 break
+
+def main():
+    try:
+        arguments = ArgumentParser(description="a command-line tool to check fixity of files in longTermStorage",
+                                   epilog="Copyright University of Chicago, 2016; authored by Tyler Danstrom <tdanstrom@uchicago.edu>")
+        arguments.add_argument("livePremis", action='store', help="location on-disk of livePremis directory")
+        arguments.add_argument("max_num_files", action='store', type=int, help="maximum allowed number of files for this run")
+        arguments.add_argument("-b", "--max_bytes_to_read", action='store', type=int, help="total number of bytes to read for this run")
+        parsed_args = arguments.parse_args()
+        iterate_over_files(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read)
         return 0
     except KeyboardInterrupt:
         return 131
