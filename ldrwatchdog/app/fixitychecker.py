@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime, timedelta
 from os import scandir
-from sys import stderr
+from sys import stderr, stdout
 from time import mktime, strptime
 from uuid import uuid4
 
@@ -59,7 +59,7 @@ def gather_files(path, live_premis_root=None):
             else:
                 stderr.write("could not open {}\n".format(entry.path))
 
-def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes):
+def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes, hash_algo=None):
     """the main function of the command-line module
 
     __Args__
@@ -69,19 +69,22 @@ def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes)
     files_to_check = gather_files(livepremis_loc,live_premis_root=livepremis_loc)
     bytes_read = 0
     files_used = 0
-    checked = []
     for n in files_to_check:
-        new_hash = sane_hash('md5', n.content_loc)
+        if hash_algo:
+            new_hash = sane_hash(hash_alg, n.content_loc)
+        else:
+            new_hash = sane_hash('md5', n.content_loc)
         event_id = EventIdentifier("DOI", str(uuid4()))
         linkedObject = LinkingObjectIdentifier("DOI", n.objid)
         linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
         if compare_two_hashes(new_hash, n.fixity_value):
             event_result = "success"
             event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
+            stdout.write("{}/{} content file passed fixity check\n".format(n.arkid, n.objid))
         else:
             event_result = "failure"
             event_message = "ldrwatchdog.fixitychecker performed fixity check and it failed"
-            stderr.write("{}/{} content file failed fixity check".format(n.arkid, n.objid))
+            stderr.write("{}/{} content file failed fixity check.\n".format(n.arkid, n.objid))
             event_detail = EventOutcomeDetail(eventOutcomeDetailNote=event_message)
             event_outcome = EventOutcomeInformation(event_result, event_detail)
             new_event = Event(event_id, "fixity check", datetime.now().isoformat())
@@ -91,13 +94,12 @@ def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes)
             this_record = n.premis_record
             this_record.add_event(new_event)
             this_record.write_to_file(n.premis_path)
-            bytes_read += int(n.file_size)
-            files_used += 1
-            checked.append(n)
-            if total_allowed_bytes and bytes_read >= total_allowed_bytes:
-                break
-            elif files_used >=  total_allowed_files:
-                break
+        bytes_read += int(n.file_size)
+        files_used += 1
+        if total_allowed_bytes and bytes_read >= total_allowed_bytes:
+            break
+        elif files_used >=  total_allowed_files:
+            break
 
 def main():
     try:
@@ -106,8 +108,9 @@ def main():
         arguments.add_argument("livePremis", action='store', help="location on-disk of livePremis directory")
         arguments.add_argument("max_num_files", action='store', type=int, help="maximum allowed number of files for this run")
         arguments.add_argument("-b", "--max_bytes_to_read", action='store', type=int, help="total number of bytes to read for this run")
+        arguments.add_argument("--hash-algo", action='store', type=str, choices=['crc32', 'sha256', 'adle32'], help="the default hash algorithm is md5")
         parsed_args = arguments.parse_args()
-        iterate_over_files(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read)
+        iterate_over_files(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read, hash_alg=parsed_args.hash_algo)
         return 0
     except KeyboardInterrupt:
         return 131
