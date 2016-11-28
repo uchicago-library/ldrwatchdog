@@ -11,7 +11,7 @@ from pypremis.nodes import *
 from uchicagoldrtoolsuite.core.lib.convenience import sane_hash
 from uchicagoldrtoolsuite.bit_level.lib.ldritems.ldrpath import LDRPath
 
-from ..lib.utils import find_particular_event, get_events_from_a_premis_record, extract_data_from_premis_record, open_premis_record
+from ..lib.utils import compare_title_lists, find_particular_event, get_events_from_a_premis_record, extract_data_from_premis_record, open_premis_record
 
 __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"

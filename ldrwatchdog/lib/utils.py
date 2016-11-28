@@ -1,7 +1,8 @@
 from collections import namedtuple
-from os.path import relpath
+from os.path import exists, join, relpath
 from sys import stderr
 
+from hierarchicalrecord.hierarchicalrecord import HierarchicalRecord
 from pypremis.lib import PremisRecord
 
 __AUTHOR__ = "Tyler Danstrom"
@@ -73,4 +74,5 @@ def get_events_from_a_premis_record(premis_record):
         raise ValueError("{} is not a valid PremisRecord instance\n".format(str(premis_record)))
     events = premis_record.get_events()
     return events
+
 
