@@ -9,7 +9,6 @@
 
 ```
 fixitycheck /home/test/livePremis 1000
-
 ```
 
 This will run a fixity check on 1000 files with PREMIS records stored in /home/test/livePremis.
@@ -19,3 +18,9 @@ postarchive /home/test/longTermStorage /home/test/livePremis
 ```
 
 This will run postarchive which will find all new premis records in /home/test/longTermStorage and copy them into /home/test/livePremis.
+
+```
+updatecollections /home/test/apistorage/records collection
+```
+
+This will run updatecollections which will find all accession hierarchical records in /home/test/apistorage and create new collection records from the collection title in accession record that are not already stored in collection hierarchical records.

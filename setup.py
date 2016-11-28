@@ -33,7 +33,8 @@ setup(
         '/tarball/master#egg=pypremis',
     ],
     entry_points =  {'console_scripts': ['postarchive = ldrwatchdog.app.postarchiver:main',
-                                         'fixitycheck = ldrwatchdog.app.fixitychecker:main']},
+                                         'fixitycheck = ldrwatchdog.app.fixitychecker:main',
+                                         'updatecollections = ldrwatchdog.app.updatecollections:main']},
     scripts=["bin/postarchive_cron",
              "bin/fixitycheck_cron"]
 )
