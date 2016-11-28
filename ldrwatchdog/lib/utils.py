@@ -33,29 +33,42 @@ def open_premis_record(premis_file_path):
         stderr.write("{} is not a valid premis record\n".format(premis_file_path))
     return output
 
-def extract_data_from_premis_record(premis_file, is_premis_object=False):
+def find_object_characteristics_from_premis(premis_object):
+    return premis_object.get_objectCharacteristics()[0]
+
+def find_fixities_from_premis(object_chars, digest_algo_filter):
+    obj_fixiites = object_chars.get_fixity()
+    for fixity in obj_fixiites:
+        if fixity.get_messageDigestAlgorithm() == digest_algo_filter:
+            return fixity.get_messageDigest()
+    return None
+
+def find_size_info_from_premis(object_chars):
+    return object_chars.get_size()
+
+def find_objid_from_premis(premis_object):
+    return premis_object.get_objectIdentifier()[0].get_objectIdentifierValue()
+
+def premis_data_packager(content_loc, this_record, objid, file_size, fixity_digest):
+    return namedtuple("premis_data", "content_loc premis_record objid file_size fixity_to_test")\
+                     (content_loc, this_record, objid, int(file_size), fixity_digest)
+
+def extract_data_from_premis_record(premis_file):
     """a function to extract data needed to run a fixity check from a particular premis xml file
     __Args__
     1. premis_file (str or PremisRecord): a string pointing to a premis record on-disk or
     an instance of a PremisRecord
     """
-    if is_premis_object:
-        this_record = premis_file
-    else:
-        this_record = open_premis_record(premis_file)
-    if this_record:
-        this_object = this_record.get_object_list()[0]
-        objid = this_object.get_objectIdentifier()[0].get_objectIdentifierValue()
-        file_size = this_object.get_objectCharacteristics()[0].get_size()
-        obj_fixiites = this_object.get_objectCharacteristics()[0].get_fixity()
-        content_loc = this_object.get_storage()[0].get_contentLocation().get_contentLocationValue()
-        for fixity in obj_fixiites:
-            if fixity.get_messageDigestAlgorithm() == 'md5':
-                fixity_to_test = fixity.get_messageDigest()
-        return namedtuple("premis_data", "content_loc premis_record objid file_size fixity_to_test")\
-                         (content_loc, this_record, objid, int(file_size), fixity_to_test)
-    else:
-        return None
+    this_record = open_premis_record(premis_file)
+    this_object = this_record.get_object_list()[0]
+    the_characteristics = find_object_characteristics_from_premis(this_object)
+    objid = find_objid_from_premis(this_object)
+    file_size = find_size_info_from_premis(the_characteristics)
+    fixity_digest = find_fixities_from_premis(the_characteristics, 'md5')
+    content_loc = this_object.get_storage()[0].get_contentLocation().get_contentLocationValue()
+    data = premis_data_packager(content_loc, this_record, objid, int(file_size), fixity_digest)
+    print(data)
+    return data
 
 def find_particular_event(event_list, event_string):
     output = None

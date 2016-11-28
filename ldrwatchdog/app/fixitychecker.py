@@ -11,7 +11,7 @@ from pypremis.nodes import *
 from uchicagoldrtoolsuite.core.lib.convenience import sane_hash
 from uchicagoldrtoolsuite.bit_level.lib.ldritems.ldrpath import LDRPath
 
-from ..lib.utils import compare_title_lists, find_particular_event, get_events_from_a_premis_record, extract_data_from_premis_record, open_premis_record
+from ..lib.utils import *
 
 __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"
@@ -20,6 +20,9 @@ __DESCRIPTION__ = "a module to use in a commmand line tool to run a fixity check
 
 def compare_two_hashes(orig_hash, new_hash):
     return orig_hash == new_hash
+
+def when_was_last_fixity_check(premis_data):
+
 
 def gather_files(path, live_premis_root=None):
     """a function to gather files to fixity check in this run based on evaluating the premis contents
@@ -33,31 +36,32 @@ def gather_files(path, live_premis_root=None):
             yield from gather_files(entry.path, live_premis_root=live_premis_root)
         if entry.is_file():
             premis_data = extract_data_from_premis_record(entry.path)
-            if premis_data:
-                event_list = premis_data.premis_record.get_event_list()
-                fixity_check_dates = []
-                for n_event in event_list:
-                    event_type =  n_event.get_eventType()
-                    if event_type == "fixity check":
-                        fixity_check_dates.append(n_event.get_eventDateTime())
-                current_date = datetime.now() - timedelta(days=80)
-                event_date_delta = None
-                for n_fixity_date in fixity_check_dates:
-                    try:
-                        event_date_delta = strptime(n_fixity_date, "%Y-%m-%d")
-                    except ValueError:
-                        event_date_delta = strptime(n_fixity_date.split('T')[0], "%Y-%m-%d")
-                    event_date_delta = datetime.fromtimestamp(mktime(event_date_delta))
-                arkid = entry.path[0:entry.path.index("arf")].split(live_premis_root)[1].replace('/','')
-                if event_date_delta:
-                    if event_date_delta < current_date or len(fixity_check_dates) == 0:
-                        n_input = namedtuple("file_to_check", "content_loc premis_path premis_record arkid objid fixity_value file_size")(premis_data.content_loc, entry.path, premis_data.premis_record, arkid, premis_data.objid, premis_data.fixity_to_test, premis_data.file_size)
-                        yield n_input
-                else:
-                    n_input = namedtuple("file_to_check", "content_loc premis_path premis_record arkid objid fixity_value file_size")(premis_data.content_loc, entry.path, premis_data.premis_record, arkid, premis_data.objid, premis_data.fixity_to_test, premis_data.file_size)
-                    yield n_input
-            else:
-                stderr.write("could not open {}\n".format(entry.path))
+            print(when_was_last_fixity_check(premis_data))
+            yield premis_data
+#                event_list = premis_data.premis_record.get_event_list()
+#                fixity_check_dates = []
+#                for n_event in event_list:
+#                    event_type =  n_event.get_eventType()
+#                    if event_type == "fixity check":
+#                        fixity_check_dates.append(n_event.get_eventDateTime())
+#                current_date = datetime.now() - timedelta(days=80)
+#                event_date_delta = None
+#                for n_fixity_date in fixity_check_dates:
+#                    try:
+#                        event_date_delta = strptime(n_fixity_date, "%Y-%m-%d")
+#                    except ValueError:
+#                        event_date_delta = strptime(n_fixity_date.split('T')[0], "%Y-%m-%d")
+#                    event_date_delta = datetime.fromtimestamp(mktime(event_date_delta))
+#                arkid = entry.path[0:entry.path.index("arf")].split(live_premis_root)[1].replace('/','')
+#                if event_date_delta:
+#                    if event_date_delta < current_date or len(fixity_check_dates) == 0:
+#                        n_input = namedtuple("file_to_check", "content_loc premis_path premis_record arkid objid fixity_value file_size")(premis_data.content_loc, entry.path, premis_data.premis_record, arkid, premis_data.objid, premis_data.fixity_to_test, premis_data.file_size)
+#                        yield n_input
+#                else:
+#                    n_input = namedtuple("file_to_check", "content_loc premis_path premis_record arkid objid fixity_value file_size")(premis_data.content_loc, entry.path, premis_data.premis_record, arkid, premis_data.objid, premis_data.fixity_to_test, premis_data.file_size)
+#                    yield n_input
+#            else:
+#                stderr.write("could not open {}\n".format(entry.path))
 
 def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes, hash_algo=None):
     """the main function of the command-line module
@@ -70,30 +74,30 @@ def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes,
     bytes_read = 0
     files_used = 0
     for n in files_to_check:
-        if hash_algo:
-            new_hash = sane_hash(hash_alg, n.content_loc)
-        else:
-            new_hash = sane_hash('md5', n.content_loc)
-        event_id = EventIdentifier("DOI", str(uuid4()))
-        linkedObject = LinkingObjectIdentifier("DOI", n.objid)
-        linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
-        if compare_two_hashes(new_hash, n.fixity_value):
-            event_result = "success"
-            event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
-            stdout.write("{}/{} content file passed fixity check\n".format(n.arkid, n.objid))
-        else:
-            event_result = "failure"
-            event_message = "ldrwatchdog.fixitychecker performed fixity check and it failed"
-            stderr.write("{}/{} content file failed fixity check.\n".format(n.arkid, n.objid))
-            event_detail = EventOutcomeDetail(eventOutcomeDetailNote=event_message)
-            event_outcome = EventOutcomeInformation(event_result, event_detail)
-            new_event = Event(event_id, "fixity check", datetime.now().isoformat())
-            new_event.set_linkingAgentIdentifier(linkedAgent)
-            new_event.set_eventOutcomeInformation(event_outcome)
-            new_event.set_linkingObjectIdentifier(linkedObject)
-            this_record = n.premis_record
-            this_record.add_event(new_event)
-            this_record.write_to_file(n.premis_path)
+#        if hash_algo:
+#            new_hash = sane_hash(hash_alg, n.content_loc)
+#        else:
+#            new_hash = sane_hash('md5', n.content_loc)
+#        event_id = EventIdentifier("DOI", str(uuid4()))
+#        linkedObject = LinkingObjectIdentifier("DOI", n.objid)
+#        linkedAgent = LinkingAgentIdentifier("DOI", str(uuid4()))
+#        if compare_two_hashes(new_hash, n.fixity_value):
+#            event_result = "success"
+#            event_message = "ldrwatchdog.fixitychecker performed fixity check and passed"
+#            stdout.write("{}/{} content file passed fixity check\n".format(n.arkid, n.objid))
+#        else:
+#            event_result = "failure"
+#            event_message = "ldrwatchdog.fixitychecker performed fixity check and it failed"
+#            stderr.write("{}/{} content file failed fixity check.\n".format(n.arkid, n.objid))
+#            event_detail = EventOutcomeDetail(eventOutcomeDetailNote=event_message)
+#            event_outcome = EventOutcomeInformation(event_result, event_detail)
+#            new_event = Event(event_id, "fixity check", datetime.now().isoformat())
+#            new_event.set_linkingAgentIdentifier(linkedAgent)
+#            new_event.set_eventOutcomeInformation(event_outcome)
+#            new_event.set_linkingObjectIdentifier(linkedObject)
+#            this_record = n.premis_record
+#            this_record.add_event(new_event)
+#            this_record.write_to_file(n.premis_path)
         bytes_read += int(n.file_size)
         files_used += 1
         if total_allowed_bytes and bytes_read >= total_allowed_bytes:
@@ -110,7 +114,7 @@ def main():
         arguments.add_argument("-b", "--max_bytes_to_read", action='store', type=int, help="total number of bytes to read for this run")
         arguments.add_argument("--hash-algo", action='store', type=str, choices=['crc32', 'sha256', 'adle32'], help="the default hash algorithm is md5")
         parsed_args = arguments.parse_args()
-        iterate_over_files(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read, hash_alg=parsed_args.hash_algo)
+        iterate_over_files(parsed_args.livePremis, parsed_args.max_num_files, parsed_args.max_bytes_to_read, hash_algo=parsed_args.hash_algo)
         return 0
     except KeyboardInterrupt:
         return 131
