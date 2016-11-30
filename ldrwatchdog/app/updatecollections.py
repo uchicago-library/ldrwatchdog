@@ -10,6 +10,7 @@ __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"
 __VERSION__ = "1.0.0"
 __DESCRIPTION__ = "a module to use in a command line tool to build new collection records for updating pre-pop acq interface collection list"
+__COPYRIGHT__ = "University of Chicago, 2016"
 
 def main():
     arguments = ArgumentParser(description="A cli application to create new hierarchicalrecords for collections when necessary",

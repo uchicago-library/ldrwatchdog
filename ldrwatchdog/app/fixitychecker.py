@@ -19,6 +19,7 @@ __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"
 __VERSION__ = "1.0.0"
 __DESCRIPTION__ = "a module to use in a commmand line tool to run a fixity check run on the contents of longTermStorage"
+__COPYRIGHT__ = "University of Chicago, 2016"
 
 def iterate_over_files(livepremis_loc, total_allowed_files, total_allowed_bytes, hash_algo=None):
     """the main function of the command-line module

@@ -13,6 +13,7 @@ __AUTHOR__ = "Tyler Danstrom"
 __EMAIL__ = "tdanstrom@uchicago.edu"
 __VERSION__ = "1.0.0"
 __DESCRIPTION__ = "a module to use in a command line tool to find all premis records in longTermStorage and if not already in livePremis copy the file into livePremis"
+__COPYRIGHT__ = "University of Chicago, 2016"
 
 def iterate_over_premisrecords(cached_file, longterm, live_premis):
     """a function to iterate over premisreocrds
